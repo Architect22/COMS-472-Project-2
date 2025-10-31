@@ -132,7 +132,6 @@ public class CheckersData {
      */
     void makeMove(int fromRow, int fromCol, int toRow, int toCol) {
         // TODO
-    	// 
     	// Update the board for the given move. You need to take care of the following situations:
         // 1. move the piece from (fromRow,fromCol) to (toRow,toCol)
         // 2. if this move is a jump, remove the captured piece
