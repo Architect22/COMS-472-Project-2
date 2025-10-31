@@ -381,6 +381,7 @@ public class Checkers extends JPanel {
                     return;
                 }
             }
+            
 
             /* If no piece has been selected to be moved, the user must first
                select a piece.  Show an error message and return. */

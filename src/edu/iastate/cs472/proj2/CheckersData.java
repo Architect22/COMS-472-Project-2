@@ -131,15 +131,34 @@ public class CheckersData {
      * @param toCol   column index of the to square
      */
     void makeMove(int fromRow, int fromCol, int toRow, int toCol) {
-        // TODO
     	// Update the board for the given move. You need to take care of the following situations:
         // 1. move the piece from (fromRow,fromCol) to (toRow,toCol)
-        // 2. if this move is a jump, remove the captured piece
-        // 3. if the piece moves into the kings row on the opponent's side of the board, crowned it as a king
+    	int playerPiece = board[fromRow][fromCol];
+    	board[toRow][toCol] = playerPiece;
+    	board[fromRow][fromCol] = EMPTY;
     	
-    	// Try to push branch
+        // 2. if this move is a jump, remove the captured piece
+    	if (isJump(fromRow, toRow)) {
+    		int jumpedRow = (fromRow > toRow ? toRow + 1 : fromRow + 1);
+    		int jumpedColumn = (fromCol > toCol ? toCol + 1 : fromCol + 1);
+    		board[jumpedRow][jumpedColumn] = EMPTY;
+    	}
+    	
+        // 3. if the piece moves into the kings row on the opponent's side of the board, crowned it as a king
+    	if ((playerPiece == BLACK) && (toRow == 7)) {
+    		board[toRow][toCol] = BLACK_KING;
+    	}
+    	else if ((playerPiece == RED) && (toRow == 0)) {
+    		board[toRow][toCol] = RED_KING;
+    	}
+ 	
     }
 
+    boolean isJump(int fromRow, int toRow) {
+        // In a jump, the piece moves two rows.  (In a regular move, it only moves one row.)
+        return Math.abs(fromRow - toRow) == 2;
+    }
+     
     /**
      * Return an array containing all the legal CheckersMoves
      * for the specified player on the current board.  If the player
@@ -171,7 +190,6 @@ public class CheckersData {
     		}
     	}
     	
-       	moves.add(new CheckersMove(5, 1, 4, 0));
     	return moves.toArray(new CheckersMove[0]);
     }
 
