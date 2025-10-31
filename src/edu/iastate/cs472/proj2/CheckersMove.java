@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * It holds a sequence of the rows and columns of the piece
  * that is to be moved, for example:
  * a single move: (2, 0) -> (3, 1)
- * a sequnce of jumps: (2, 0) -> (4, 2) -> (6, 0)
+ * a sequence of jumps: (2, 0) -> (4, 2) -> (6, 0)
  *
  */
 public class CheckersMove {
