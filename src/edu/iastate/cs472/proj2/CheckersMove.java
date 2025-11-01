@@ -65,4 +65,44 @@ public class CheckersMove {
         
     }
     
+    public boolean canJumpBeAddedToMove(int row, int column) {
+    	int numMoves = rows.size();
+    	if (numMoves < 2) {
+    		return false;
+    	}
+    	
+		// Jump cannot be added if we are going back to the previous move location
+    	if ((rows.get(numMoves-2) == row) && (cols.get(numMoves-2) == column)) {
+    		return false;
+    	}
+		
+		// It also cannot be added if adding this would result in 2 sets of duplicate row/column combinations,
+		// as it is possible to get back to a previous jump location once (as in jumping in a circle), but you
+		// cannot get back to two locations
+    	int numDuplicates = 0;
+    	
+    	// Check current location for duplicate first
+    	if (doesMoveExist(row, column, 0)) {
+    		numDuplicates++;
+    	}
+    	
+    	// Check for a duplicate in existing moves
+       	for (int i=0; i<rows.size(); ++i) {
+       		if (doesMoveExist(rows.get(i).intValue(), cols.get(i).intValue(), i+1)) {
+       			numDuplicates++;
+       		}
+    	}
+       	
+       	return numDuplicates < 2;
+    }
+    
+    private boolean doesMoveExist(int row, int column, int startRow) {
+    	for (int i=startRow; i<rows.size(); ++i) {
+    		if ((rows.get(i) == row) && (cols.get(i) == column)) {
+    			return true;
+    		}
+    	}
+    	return false;    	
+    }
+    
 }  // end class CheckersMove.
