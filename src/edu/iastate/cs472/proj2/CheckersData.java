@@ -3,6 +3,7 @@ package edu.iastate.cs472.proj2;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * An object of this class holds data about a game of checkers.
@@ -180,13 +181,31 @@ public class CheckersData {
     	for (int row=0; row<8; ++row) {
     		for (int column=0; column<8; ++column) {
 				// Look to see if there are moves into empty spaces
-    			addPossibleMoveSE(player, row, column, moves);
-       			addPossibleMoveSW(player, row, column, moves);
-    			addPossibleMoveNE(player, row, column, moves);
-       			addPossibleMoveNW(player, row, column, moves);
+    			CheckersMove move = addPossibleMoveSE(player, row, column);
+    			if (move != null) {
+    				moves.add(move);
+    			}
+    			
+    			move = addPossibleMoveSW(player, row, column);
+    			if (move != null) {
+    				moves.add(move);
+    			}
+    			
+    			move = addPossibleMoveNE(player, row, column);
+    			if (move != null) {
+    				moves.add(move);
+    			}
+    			
+    			move = addPossibleMoveNW(player, row, column);
+    			if (move != null) {
+    				moves.add(move);
+    			}
        		    			
 				// Look to see if there is a jump starting from here
-
+       			CheckersMove[] jumps = getLegalJumpsFrom(player, row, column);
+       			if ((jumps != null) && (jumps.length > 0)) {
+       				moves.addAll(Arrays.asList(jumps));
+       			}
     		}
     	}
     	
@@ -209,65 +228,247 @@ public class CheckersData {
      * @param col    col index of the start square.
      */
 	CheckersMove[] getLegalJumpsFrom(int player, int row, int col) {
-        // TODO 
-        return null;
+
+		List<CheckersMove> moves = new ArrayList<CheckersMove>();
+		
+		// Get list of possible single jumps
+		Stack<CheckersMove> queue = getLegalSingleJumpsFrom(player, row, col);
+		
+		while (!queue.isEmpty()) {
+			CheckersMove jump = queue.pop();
+			int jumpRow = jump.rows.getLast();
+			int jumpCol = jump.cols.getLast();
+			
+			// Check to see if there are more jumps that can be made
+			CheckersMove multijumpMove = addPossibleJumpSE(player, jumpRow, jumpCol, jump);
+			if (multijumpMove == null) {
+				// No more jumps available
+				moves.add(jump);
+			} else {
+				// See if more jumps can be added
+				queue.add(multijumpMove);
+			}
+			
+			multijumpMove = addPossibleJumpSW(player, jumpRow, jumpCol, jump);
+			if (multijumpMove == null) {
+				moves.add(jump);
+			} else {
+				queue.add(multijumpMove);
+			}
+			
+			multijumpMove = addPossibleJumpNE(player, jumpRow, jumpCol, jump);
+			if (multijumpMove == null) {
+				moves.add(jump);
+			} else {
+				queue.add(multijumpMove);
+			}
+			
+			multijumpMove = addPossibleJumpNW(player, jumpRow, jumpCol, jump);
+			if (multijumpMove == null) {
+				moves.add(jump);
+			} else {
+				queue.add(multijumpMove);
+			}
+		}
+				
+    	return moves.toArray(new CheckersMove[0]);
     }
 	
-	private void addPossibleMoveSE(int player, int row, int column, List<CheckersMove> moves) {
-		if (!isWithinGameBounds(row+1, column-1) || board[row+1][column-1] != EMPTY) {
-			return;
+	private Stack<CheckersMove> getLegalSingleJumpsFrom(int player, int row, int col) {
+		Stack<CheckersMove> queue = new Stack<CheckersMove>();
+		
+		CheckersMove move = addPossibleJumpSE(player, row, col, null);
+		if (move != null) {
+			queue.add(move);
+		}
+		
+		move = addPossibleJumpSW(player, row, col, null);
+		if (move != null) {
+			queue.add(move);
+		}
+		
+		move = addPossibleJumpNE(player, row, col, null);
+		if (move != null) {
+			queue.add(move);
+		}
+		
+		move = addPossibleJumpNW(player, row, col, null);
+		if (move != null) {
+			queue.add(move);
+		}
+		
+		return queue;
+	}
+	
+	private CheckersMove addPossibleMoveSW(int player, int row, int column) {
+		int moveToRow = row+1;
+		int moveToColumn = column-1;
+		
+		return addPossibleMoveSouth(player, row, column, moveToRow, moveToColumn);
+	}
+	
+	private CheckersMove addPossibleMoveSE(int player, int row, int column) {
+		int moveToRow = row+1;
+		int moveToColumn = column+1;
+		
+		return addPossibleMoveSouth(player, row, column, moveToRow, moveToColumn);
+	}
+	
+	private CheckersMove addPossibleMoveNW(int player, int row, int column) {
+		int moveToRow = row-1;
+		int moveToColumn = column-1;
+		
+		return addPossibleMoveNorth(player, row, column, moveToRow, moveToColumn);
+	}
+
+	private CheckersMove addPossibleMoveNE(int player, int row, int column) {
+		int moveToRow = row-1;
+		int moveToColumn = column+1;
+		
+		return addPossibleMoveNorth(player, row, column, moveToRow, moveToColumn);
+	}
+	
+	private CheckersMove addPossibleMoveSouth(int player, int row, int column, int moveToRow, int moveToColumn) {
+		if (!isWithinGameBounds(moveToRow, moveToColumn) || board[moveToRow][moveToColumn] != EMPTY) {
+			return null;
 		}
 		
 		boolean legalBlackMove = (player == BLACK) && (board[row][column] == BLACK || board[row][column] == BLACK_KING);
 		boolean legalRedMove = (player == RED) && (board[row][column] == RED_KING);	
 	
 		if (legalRedMove || legalBlackMove) {	
-			moves.add(new CheckersMove(row,  column,  row+1,  column-1));
-		}
-	}
-	
-	private void addPossibleMoveSW(int player, int row, int column, List<CheckersMove> moves) {
-		if (!isWithinGameBounds(row+1, column+1) || board[row+1][column+1] != EMPTY) {
-			return;
+			return new CheckersMove(row,  column,  moveToRow,  moveToColumn);
 		}
 		
-		boolean legalBlackMove = (player == BLACK) && (board[row][column] == BLACK || board[row][column] == BLACK_KING);
-		boolean legalRedMove = (player == RED) && (board[row][column] == RED_KING);	
+		return null;
+	}	
 	
-		if (legalRedMove || legalBlackMove) {	
-			moves.add(new CheckersMove(row,  column,  row+1,  column+1));
-		}
-	}
-	
-	private void addPossibleMoveNE(int player, int row, int column, List<CheckersMove> moves) {
-		if (!isWithinGameBounds(row-1, column-1) || board[row-1][column-1] != EMPTY) {
-			return;
+	private CheckersMove addPossibleMoveNorth(int player, int row, int column, int moveToRow, int moveToColumn) {
+		if (!isWithinGameBounds(moveToRow, moveToColumn) || board[moveToRow][moveToColumn] != EMPTY) {
+			return null;
 		}
 		
 		boolean legalRedMove = (player == RED) && (board[row][column] == RED || board[row][column] == RED_KING);
-		boolean legalBlackMove = (player == BLACK) && (board[row][column] == BLACK_KING);
-
-			
+		boolean legalBlackMove = (player == BLACK) && (board[row][column] == BLACK_KING);	
+	
 		if (legalRedMove || legalBlackMove) {	
-			moves.add(new CheckersMove(row,  column,  row-1,  column-1));
-		}
-	}
-
-	private void addPossibleMoveNW(int player, int row, int column, List<CheckersMove> moves) {
-		if (!isWithinGameBounds(row-1, column+1) || board[row-1][column+1] != EMPTY) {
-			return;
+			return new CheckersMove(row,  column,  moveToRow,  moveToColumn);
 		}
 		
-		boolean legalRedMove = (player == RED) && (board[row][column] == RED || board[row][column] == RED_KING);
-		boolean legalBlackMove = (player == BLACK) && (board[row][column] == BLACK_KING);
+		return null;
+	}
+	
+	private CheckersMove addPossibleJumpSW(int player, int row, int column, CheckersMove prevMove) {
+		int jumpToRow = row+2;
+		int jumpToColumn = column-2;
+		int playerToJumpRow = row+1;
+		int playerToJumpColumn = column-1;
+		
+		return addPossibleJumpSouth(player, row, column, jumpToRow, jumpToColumn, playerToJumpRow, playerToJumpColumn, prevMove);
+	}
+	
+	private CheckersMove addPossibleJumpSE(int player, int row, int column, CheckersMove prevMove) {
+		int jumpToRow = row+2;
+		int jumpToColumn = column+2;
+		int playerToJumpRow = row+1;
+		int playerToJumpColumn = column+1;
+		
+		return addPossibleJumpSouth(player, row, column, jumpToRow, jumpToColumn, playerToJumpRow, playerToJumpColumn, prevMove);
+	}
+	
+	private CheckersMove addPossibleJumpNW(int player, int row, int column, CheckersMove prevMove) {
+		int jumpToRow = row-2;
+		int jumpToColumn = column-2;
+		int playerToJumpRow = row-1;
+		int playerToJumpColumn = column-1;
+		
+		return addPossibleJumpNorth(player, row, column, jumpToRow, jumpToColumn, playerToJumpRow, playerToJumpColumn, prevMove);
+	}
 
-			
-		if (legalRedMove || legalBlackMove) {	
-			moves.add(new CheckersMove(row,  column,  row-1,  column+1));
+	private CheckersMove addPossibleJumpNE(int player, int row, int column, CheckersMove prevMove) {
+		int jumpToRow = row-2;
+		int jumpToColumn = column+2;
+		int playerToJumpRow = row-1;
+		int playerToJumpColumn = column+1;
+		
+		return addPossibleJumpNorth(player, row, column, jumpToRow, jumpToColumn, playerToJumpRow, playerToJumpColumn, prevMove);
+	}
+	
+	private CheckersMove addPossibleJumpSouth(int player, int row, int column, int jumpToRow,
+			int jumpToColumn, int playerToJumpRow, int playerToJumpColumn, CheckersMove prevMove) {
+		
+		if (!isWithinGameBounds(jumpToRow, jumpToColumn) || board[jumpToRow][jumpToColumn] != EMPTY) {
+			return null;
 		}
+		
+		int pieceThatStartedJump = prevMove == null
+				? board[row][column]
+				: board[prevMove.rows.getFirst()][prevMove.cols.getFirst()];
+		
+		boolean legalBlackMove = (player == BLACK) &&
+			(pieceThatStartedJump == BLACK || pieceThatStartedJump == BLACK_KING) &&
+			existsRedPlayerPiece(playerToJumpRow, playerToJumpColumn);
+		
+		boolean legalRedMove = (player == RED) &&
+			(pieceThatStartedJump == RED_KING) &&
+			existsBlackPlayerPiece(playerToJumpRow, playerToJumpColumn);
+		
+		if (legalRedMove || legalBlackMove) {
+			if (prevMove == null) {
+				return new CheckersMove(row,  column,  jumpToRow,  jumpToColumn);
+			} else if (prevMove.canJumpBeAddedToMove(jumpToRow, jumpToColumn)) {
+				CheckersMove clone = prevMove.clone();
+				clone.addMove(jumpToRow, jumpToColumn);
+				return clone;
+			}
+		}
+		
+		return null;
+	}
+
+	private CheckersMove addPossibleJumpNorth(int player, int row, int column, int jumpToRow,
+			int jumpToColumn, int playerToJumpRow, int playerToJumpColumn, CheckersMove prevMove) {
+		
+		if (!isWithinGameBounds(jumpToRow, jumpToColumn) || board[jumpToRow][jumpToColumn] != EMPTY) {
+			return null;
+		}
+	
+		int pieceThatStartedJump = prevMove == null
+				? board[row][column]
+				: board[prevMove.rows.getFirst()][prevMove.cols.getFirst()];
+		
+		// Broken: The existing row/column is empty on a jump, so we need to not check
+		// the piece at a location, but the piece the started the jump
+		boolean legalRedMove = (player == RED) &&
+			(pieceThatStartedJump == RED || pieceThatStartedJump == RED_KING) &&
+			existsBlackPlayerPiece(playerToJumpRow, playerToJumpColumn);
+		
+		boolean legalBlackMove = (player == BLACK) &&
+			(pieceThatStartedJump == BLACK_KING) &&
+			existsBlackPlayerPiece(playerToJumpRow, playerToJumpColumn);
+		
+		if (legalRedMove || legalBlackMove) {
+			if (prevMove == null) {
+				return new CheckersMove(row,  column,  jumpToRow,  jumpToColumn);
+			} else if (prevMove.canJumpBeAddedToMove(jumpToRow, jumpToColumn)) {
+				CheckersMove clone = prevMove.clone();
+				clone.addMove(jumpToRow, jumpToColumn);
+				return clone;
+			}
+		}
+		
+		return null;
 	}
 	
 	private boolean isWithinGameBounds(int row, int column) {
 		return ((row >= 0) && (row < 8) && (column >= 0) && (column < 8));
+	}
+	
+	private boolean existsRedPlayerPiece(int row, int column) {
+		return ((board[row][column] == RED) || (board[row][column] == RED_KING));	
+	}
+
+	private boolean existsBlackPlayerPiece(int row, int column) {
+		return ((board[row][column] == BLACK) || (board[row][column] == BLACK_KING));	
 	}
 }
