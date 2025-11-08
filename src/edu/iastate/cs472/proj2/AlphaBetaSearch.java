@@ -2,7 +2,7 @@ package edu.iastate.cs472.proj2;
 
 /**
  * 
- * @author 
+ * @author Benjamin Brown
  *
  */
 
@@ -45,7 +45,33 @@ public class AlphaBetaSearch extends AdversarialSearch {
         return legalMoves[0];
     }
     
-    // TODO
-    // Implement your helper methods here.
+
+    @Override
+    protected int calculateHeuristic(CheckersData state, int player) {
+    	int pieceCount = 0;
+    	for(int row = 0; row < 8; ++row) {
+    		for(int col = 0; col < 8; ++col) {
+    			if(player == CheckersData.RED && state.existsRedPlayerPiece(row, col)) {
+    				pieceCount++;
+    			}
+    			else if(player == CheckersData.BLACK && state.existsBlackPlayerPiece(row, col)) {
+    				pieceCount++;
+    			}
+    		}
+    	}
+    	return pieceCount;
+    }
+    
+//    In addition, the class AlphaBetaSearch needs to implement an evaluation function that takes a
+//    state of the game as input and returns a value. The utility function for terminal states has the
+//    following values:
+//    • 1 if a win by the agent,
+//    • −1 if a loss by the agent,
+//    • 0 if a draw.
+//    The score on a leaf that is not a terminal node is generated according to a heuristic of yours. 
+    private int evaluate(CheckersData state) {
+    	
+    	return 0;
+    }
 
 }

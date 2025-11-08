@@ -464,11 +464,11 @@ public class CheckersData {
 		return ((row >= 0) && (row < 8) && (column >= 0) && (column < 8));
 	}
 	
-	private boolean existsRedPlayerPiece(int row, int column) {
+	public boolean existsRedPlayerPiece(int row, int column) {
 		return ((board[row][column] == RED) || (board[row][column] == RED_KING));	
 	}
 
-	private boolean existsBlackPlayerPiece(int row, int column) {
+	public boolean existsBlackPlayerPiece(int row, int column) {
 		return ((board[row][column] == BLACK) || (board[row][column] == BLACK_KING));	
 	}
 }

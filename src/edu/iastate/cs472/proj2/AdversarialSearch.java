@@ -2,7 +2,7 @@ package edu.iastate.cs472.proj2;
 
 /**
  * 
- * @author
+ * @author Benjamin Brown
  *
  */
 
@@ -20,12 +20,17 @@ public abstract class AdversarialSearch {
     }
     
     /** 
-     * 
+     * takes a state as input and returns a list of legal moves at the state. The load of
+	 * implementation can be shifted to the method getLegalMoves() within CheckersData,)
+	 * 
      * @return an array of valid moves
      */
-    protected CheckersMove[] legalMoves() {
-    	// TODO
-    	return null; 
+    protected CheckersMove[] legalMoves(CheckersData state, int player) {
+    	return state.getLegalMoves(player); 
+    }
+    
+    protected int calculateHeuristic(CheckersData state, int player) {
+    	return 0;
     }
 	
     /**
