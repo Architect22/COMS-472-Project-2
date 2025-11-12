@@ -16,8 +16,22 @@ import java.util.Random;
  */
 public class MonteCarloTreeSearch extends AdversarialSearch {
 
-	private int iterations = 0;
-	private MCTree tree = null;
+	private int iterations;
+	private MCTree<CheckersData, CheckersMove> tree;
+	private Game game;
+	
+	/*
+	 * @param <S>  Type which is used for states in the game.   -> CheckersData
+	 * @param <A>  Type which is used for actions in the game.  -> legalMoves (CheckersMove[])
+	 * @param <P>  Type which is used for players in the game.  -> player 1 or player 2 - int
+	 * https://github.com/aimacode/aima-java/blob/d8f049fb02231caa22c48ff970f1b22d5e547771/aima-core/src/main/java/aima/core/search/adversarial/MonteCarloTreeSearch.java
+	 */
+	public MonteCarloTreeSearch(Game game) {
+		this.game = game;
+		this.iterations = 1;  // TODO: How many iterations do we want?
+		tree = new MCTree<>();
+	}	
+	
 	/**
      * The input parameter legalMoves contains all the possible moves.
      * It contains four integers:  fromRow, fromCol, toRow, toCol
@@ -47,7 +61,9 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
         
         // Return the move for the current state.
         // Here, we simply return the first legal move for demonstration.
-        return legalMoves[0];
+        //return legalMoves[0];
+        
+        return makeDecision(board);
     }
     
     // TODO
@@ -61,15 +77,15 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
     // remove these two classes. 
     // 
     
-	public CheckersMove makeDecision(MCNode state) {
+	public CheckersMove makeDecision(CheckersData state) {
 		// tree <-- NODE(state)
 		tree.addRoot(state);
 		// while TIME-REMAINING() do
 		while (iterations != 0) {
 			// leaf <-- SELECT(tree)
-			MCNode leaf = select(tree);
+			MCNode<CheckersData, CheckersMove> leaf = select(tree);
 			// child <-- EXPAND(leaf)
-			MCNode child = expand(leaf);
+			MCNode<CheckersData, CheckersMove> child = expand(leaf);
 			// result <-- SIMULATE(child)
 			// result = true if player of root node wins
 			boolean result = simulate(child);
@@ -82,32 +98,19 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
 		return bestAction(tree.getRoot());
 	}
     
-	private CheckersMove bestAction(MCNode root) {
-		MCNode bestChild = tree.getChildWithMaxPlayouts(root);
+	private CheckersMove bestAction(MCNode<CheckersData, CheckersMove> root) {
+		MCNode<CheckersData, CheckersMove> bestChild = tree.getChildWithMaxPlayouts(root);
 		for (CheckersMove a : game.getActions(root.getGameState())) {
-			S result = game.getResult(root.getGameState(), a);
+			CheckersData result = game.getResult(root.getGameState(), a);
 			if (result.equals(bestChild.getGameState())) return a;
 		}
 		return null;
 	}
-    
-    /**
-     * For the selection step that starts at the root of the search tree, use the upper confidence
-	 * bound formula UCB(n) (i.e., UCB1(n) in the textbook on p. 163) and set the constant C
-	 * used for balancing exploitation and exploration to its theoretically optimal value root 2
-     */
-	private MCNode select(MCTree gameTree) {
-		MCNode node = gameTree.getRoot();
-		while (!game.isTerminal(node.getGameState()) && isNodeFullyExpanded(node)) {
-			node = gameTree.getChildWithMaxUCT(node);
-		}
-		return node;
-	}
-	
-	private boolean isNodeFullyExpanded(MCNode node) {
-		List<MCNode> visitedChildren = tree.getVisitedChildren(node);
+   
+	private boolean isNodeFullyExpanded(MCNode<CheckersData, CheckersMove> node) {
+		List<CheckersData> visitedChildren = tree.getVisitedChildren(node);
 		for (CheckersMove a : game.getActions(node.getGameState())) {
-			S result = game.getResult(node.getGameState(), a);
+			CheckersData result = game.getResult(node.getGameState(), a);
 			if (!visitedChildren.contains(result)) {
 				return false;
 			}
@@ -115,10 +118,26 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
 		return true;
 	}
 	
-	private MCNode expand(MCNode leaf) {
+    /**
+     * TODO:
+     * For the selection step that starts at the root of the search tree, use the upper confidence
+	 * bound formula UCB(n) (i.e., UCB1(n) in the textbook on p. 163) and set the constant C
+	 * used for balancing exploitation and exploration to its theoretically optimal value root 2
+     */
+	private MCNode<CheckersData, CheckersMove> select(MCTree<CheckersData, CheckersMove> gameTree) {
+		MCNode<CheckersData, CheckersMove> node = gameTree.getRoot();
+		while (!game.isTerminal(node.getGameState()) && isNodeFullyExpanded(node)) {
+			node = gameTree.getChildWithMaxUCT(node);
+		}
+		return node;
+	}
+	
+
+	
+	private MCNode<CheckersData, CheckersMove> expand(MCNode<CheckersData, CheckersMove> leaf) {
 		if (game.isTerminal(leaf.getGameState())) return leaf;
 		else {
-			MCNode child = randomlySelectUnvisitedChild(leaf);
+			MCNode<CheckersData, CheckersMove> child = randomlySelectUnvisitedChild(leaf);
 			return child;
 		}
 	}
@@ -127,13 +146,13 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
      * During simulation, every state makes a uniformly random choice among all legal moves,
 	 * whether for the agent or for its human opponent
      */
-	private boolean simulate(MCNode node) {
+	private boolean simulate(MCNode<CheckersData, CheckersMove> node) {
 		while (!game.isTerminal(node.getGameState())) {
 			Random rand = new Random();
-			CheckersMove a = game.getActions(node.getGameState()).get(rand.nextInt(game.getActions(node.getGameState()).size()));
-			S result = game.getResult(node.getGameState(), a);
-			NodeFactory nodeFactory = new NodeFactory();
-			node = nodeFactory.createNode(result);
+			List<CheckersMove> legalMoves = game.getActions(node.getGameState());
+			CheckersMove a = legalMoves.get(rand.nextInt(legalMoves.size()));
+			CheckersData result = game.getResult(node.getGameState(), a);
+			node = new MCNode<CheckersData, CheckersMove>(result);
 		}
 		if (game.getUtility(node.getGameState(), game.getPlayer(tree.getRoot().getGameState())) > 0) return true;
 		else return false;
@@ -143,20 +162,20 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
      * During back propagation, a draw from the playout causes the numerator of every node,
 	 * whether black or white, along the upward path to the root to increase by 0.5.
      */
-	private void backpropagate(boolean result, MCNode node) {
+	private void backpropagate(boolean result, MCNode<CheckersData, CheckersMove> node) {
 		tree.updateStats(result, node);
 		if (tree.getParent(node) != null) backpropagate(result, tree.getParent(node));
 	}
 	
-	private MCNode randomlySelectUnvisitedChild(MCNode node) {
-		List<MCNode> unvisitedChildren = new ArrayList<>();
-		List<MCNode> visitedChildren = tree.getVisitedChildren(node);
+	private MCNode<CheckersData, CheckersMove> randomlySelectUnvisitedChild(MCNode<CheckersData, CheckersMove> node) {
+		List<CheckersData> unvisitedChildren = new ArrayList<>();
+		List<CheckersData> visitedChildren = tree.getVisitedChildren(node);
 		for (CheckersMove a : game.getActions(node.getGameState())) {
-			S result = game.getResult(node.getGameState(), a);
+			CheckersData result = game.getResult(node.getGameState(), a);
 			if (!visitedChildren.contains(result)) unvisitedChildren.add(result);
 		}
 		Random rand = new Random();
-		MCNode newChild = tree.addNode(node, unvisitedChildren.get(rand.nextInt(unvisitedChildren.size())));
+		MCNode<CheckersData, CheckersMove> newChild = tree.addChild(node, unvisitedChildren.get(rand.nextInt(unvisitedChildren.size())));
 		return newChild;
 	}
 

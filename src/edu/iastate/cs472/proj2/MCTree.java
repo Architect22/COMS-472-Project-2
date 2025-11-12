@@ -1,6 +1,7 @@
 package edu.iastate.cs472.proj2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -10,74 +11,123 @@ import java.util.Random;
  * 
  * @author Benjamin Brown
  *
- * @param <E>
+ * @param <S, A>
  */
-public class MCTree<E> 
+
+/**
+ *	Basic implementation of Game Tree for the Monte Carlo Tree Search
+ *
+ * 	Wi stands for the number of wins for the node considered after the i-th move.
+ * 	Ni stands for the number of simulations for the node considered after the i-th move.
+ *
+ * @author Suyash Jain
+ */
+
+public class MCTree<S, A> 
 {
-	MCNode<E> root;
-	int size;
+	HashMap<MCNode<S, A>, List<MCNode<S, A>>> gameTree;
+	HashMap<S, Double> Wi, Ni;
+	MCNode<S, A> root;
 	
-	public void addRoot(MCNode<E> root) {
-		this.root = root;
-		size++;
+	
+	public MCTree() {
+		this.gameTree = new HashMap<>();
+		Wi = new HashMap<>();
+		Ni = new HashMap<>();
 	}
 	
-	public MCNode<E> addNode(MCNode<E> node, MCNode<E> parent) {
-		parent.children.add(node);
-		node.setParent(parent);
-		return node;
+	
+	public void addRoot(S root) {
+		MCNode<S, A> rootNode = new MCNode<>(root);
+		this.root = rootNode;
+		gameTree.put(rootNode, new ArrayList<>());
+		Wi.put(root, 0.0);
+		Ni.put(root, 0.0);
 	}
 	
-	public MCNode<E> getRoot(){
+	public MCNode<S, A> getRoot(){
 		return root;
 	}
 	
-	public MCNode<E> getChildWithMaxPlayouts(MCNode<E> root){
-		// TODO: needs tree navigation. probably recursive
-		int max = 0;
-		MCNode<E> currentBest = null;
-		for(int i = 0; i < root.children.size(); ++i) {
-			if(root.children.get(i).getPlayouts() > max) {
-				max = root.children.get(i).getPlayouts();
-				currentBest = root.children.get(i);
-				
+	public List<S> getVisitedChildren(MCNode<S, A> parent) {
+		List<S> visitedChildren = new ArrayList<>();
+		if (gameTree.containsKey(parent)) {
+			for (MCNode<S, A> child : gameTree.get(parent)) {
+				visitedChildren.add(child.getGameState());
 			}
 		}
-		return currentBest;
+		return visitedChildren;
+	}
+
+	public MCNode<S, A> addChild(MCNode<S, A> parent, S child) {
+		MCNode<S, A> newChild = new MCNode<>(child);
+		List<MCNode<S, A>> children = successors(parent);
+		children.add(newChild);
+		gameTree.put(parent, children);
+		Wi.put(child, 0.0);
+		Ni.put(child, 0.0);
+		return newChild;
 	}
 	
-	public ArrayList<MCNode<E>> getVisitedChildren(MCNode<E> node){
-		return null;
+	public MCNode<S, A> getParent(MCNode<S, A> node) {
+		MCNode<S, A> parent = null;
+		for (MCNode<S, A> key : gameTree.keySet()) {
+			List<MCNode<S, A>> children = successors(key);
+			for (MCNode<S, A> child : children) {
+				if (child.getGameState() == node.getGameState()) {
+					parent = key;
+					break;
+				}
+			}
+			if (parent != null) break;
+		}
+		return parent;
 	}
 	
-	public MCNode<E> getParent(MCNode<E> node){
-		return node.getParent();
+	
+	public List<MCNode<S, A>> successors(MCNode<S, A> node) {
+		if (gameTree.containsKey(node)) return gameTree.get(node);
+		else return new ArrayList<>();
+	}
+
+	public void updateStats(boolean result, MCNode<S, A> node) {
+		Ni.put(node.getGameState(), Ni.get(node.getGameState()) + 1);
+		if (result) Wi.put(node.getGameState(), Wi.get(node.getGameState()) + 1);
 	}
 	
-	public MCNode<E> getChildWithMaxUCT(MCNode<E> node) {
-		List<MCNode<E>> best_children = new ArrayList<>();
+	public MCNode<S, A> getChildWithMaxUCT(MCNode<S, A> node) {
+		List<MCNode<S, A>> best_children = new ArrayList<>();
 		double max_uct = Double.NEGATIVE_INFINITY;
-		
-//		Wi stands for the number of wins for the node considered after the i-th move.
-//		Ni stands for the number of simulations for the node considered after the i-th move.
-//		HashMap<S, Double> Wi, Ni;
-		
-		for (MCNode<E> child : node.children) {
-//			double uct = ((Wi.get(child.getState())) / (Ni.get(child.getState()))) + Math.sqrt((2 / Ni.get(child.getState())) * (Math.log(Ni.get(node.getState()))));
-//			if (uct > max_uct) {
-//				max_uct = uct;
-//				best_children = new ArrayList<>();
-//				best_children.add(child);
-//			} else if (uct == max_uct) {
-//				best_children.add(child);
-//			}
+		for (MCNode<S, A> child : successors(node)) {
+			double uct = ((Wi.get(child.getGameState())) / (Ni.get(child.getGameState()))) + Math.sqrt((2 / Ni.get(child.getGameState())) * (Math.log(Ni.get(node.getGameState()))));
+			if (uct > max_uct) {
+				max_uct = uct;
+				best_children = new ArrayList<>();
+				best_children.add(child);
+			} else if (uct == max_uct) {
+				best_children.add(child);
+			}
 		}
 		
 		Random rand = new Random();
 		return best_children.get(rand.nextInt(best_children.size()));
 	}
-	public void updateStats(boolean result, MCNode node) {
-//		Ni.put(node.getState(), Ni.get(node.getState()) + 1);
-//		if (result) Wi.put(node.getState(), Wi.get(node.getState()) + 1);
+	
+	public MCNode<S, A> getChildWithMaxPlayouts(MCNode<S, A> node) {
+		List<MCNode<S, A>> best_children = new ArrayList<>();
+		double max_playouts = Double.NEGATIVE_INFINITY;
+		for (MCNode<S, A> child : successors(node)) {
+			double playouts = (Ni.get(child.getGameState()));
+			if (playouts > max_playouts) {
+				max_playouts = playouts;
+				best_children = new ArrayList<>();
+				best_children.add(child);
+			} else if (playouts == max_playouts) {
+				best_children.add(child);
+			}
+		}
+		Random rand = new Random();
+		return best_children.get(rand.nextInt(best_children.size()));
 	}
+	
 }

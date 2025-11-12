@@ -68,6 +68,18 @@ public class CheckersData {
 
         return sb.toString();
     }
+    
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if (this == obj) {
+    		return true;
+    	}
+    	if (obj instanceof CheckersData c) {
+    		return Arrays.deepEquals(this.board, c.board);
+    	}
+        return false;
+    }
 
     /**
      * Set up the board with checkers in position for the beginning
