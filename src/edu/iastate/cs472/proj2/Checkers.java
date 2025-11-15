@@ -645,18 +645,28 @@ public class Checkers extends JPanel {
 
 		@Override
 		public double getUtility(CheckersData state, int player) {
-	    	int pieceCount = 0;
+	    	int redPieceCount = 0;
+	    	int blackPieceCount = 0;
 	    	for(int row = 0; row < 8; ++row) {
 	    		for(int col = 0; col < 8; ++col) {
-	    			if(player == CheckersData.RED && state.existsRedPlayerPiece(row, col)) {
-	    				pieceCount++;
+	    			if (state.existsRedPlayerPiece(row, col)) {
+	    				redPieceCount++;
 	    			}
-	    			else if(player == CheckersData.BLACK && state.existsBlackPlayerPiece(row, col)) {
-	    				pieceCount++;
+	    			else if (state.existsBlackPlayerPiece(row, col)) {
+	    				blackPieceCount++;
 	    			}
+	    			// if(player == CheckersData.RED && state.existsRedPlayerPiece(row, col)) {
+//	    				redPieceCount++;
+//	    			}
+//	    			else if(player == CheckersData.BLACK && state.existsBlackPlayerPiece(row, col)) {
+//	    				blackPieceCount++;
+//	    			}
 	    		}
 	    	}
-	    	return pieceCount;
+	    	
+	    	int myPieceCount = (player == CheckersData.RED) ? redPieceCount : blackPieceCount;
+	    	int otherPieceCount = (player == CheckersData.BLACK) ? redPieceCount : blackPieceCount;
+	    	return Integer.compare(myPieceCount, otherPieceCount);
 	    }
     }  // end class Board
     public void timeDelay(int t) {
