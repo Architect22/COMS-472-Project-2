@@ -68,6 +68,18 @@ public class CheckersData {
 
         return sb.toString();
     }
+    
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if (this == obj) {
+    		return true;
+    	}
+    	if (obj instanceof CheckersData c) {
+    		return Arrays.deepEquals(this.board, c.board);
+    	}
+        return false;
+    }
 
     /**
      * Set up the board with checkers in position for the beginning
@@ -180,7 +192,7 @@ public class CheckersData {
        	
     	for (int row=0; row<8; ++row) {
     		for (int column=0; column<8; ++column) {
-				// Look to see if there are moves into empty spaces
+       			// Look to see if there are moves into empty spaces
     			CheckersMove move = addPossibleMoveSE(player, row, column);
     			if (move != null) {
     				moves.add(move);
@@ -199,16 +211,25 @@ public class CheckersData {
     			move = addPossibleMoveNW(player, row, column);
     			if (move != null) {
     				moves.add(move);
-    			}
-       		    			
-				// Look to see if there is a jump starting from here
+    			}  
+
+    			// Look to see if there is a jump starting from here
        			CheckersMove[] jumps = getLegalJumpsFrom(player, row, column);
        			if ((jumps != null) && (jumps.length > 0)) {
        				moves.addAll(Arrays.asList(jumps));
        			}
+    			
     		}
     	}
     	
+    	// If there are any jump moves, remove the single space moves since jumps are required
+    	if (moves.stream().anyMatch(x -> x.isJump())) {
+    	   	moves = moves.stream().filter(x -> x.isJump()).toList();    		
+    	}
+    	
+    	if (moves.size() == 0) {
+    		return null;
+    	}
     	return moves.toArray(new CheckersMove[0]);
     }
 

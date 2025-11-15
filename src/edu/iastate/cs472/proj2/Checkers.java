@@ -7,7 +7,9 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.InputMismatchException;
+import java.util.List;
 //Scanner for the external input.
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -213,7 +215,7 @@ public class Checkers extends JPanel {
         }  // end paintComponent()
     }
     
-    private class Board extends JPanel implements ActionListener, MouseListener {
+    private class Board extends JPanel implements ActionListener, MouseListener, Game {
         CheckersData board;  // The data for the checkers board is kept here.
         //    This board is also responsible for generating
         //    lists of legal moves.
@@ -262,7 +264,7 @@ public class Checkers extends JPanel {
         	Scanner stdin = new Scanner(System.in);
     		boolean done = false;
     		player_1 = new AlphaBetaSearch();
-        	player_2 = new MonteCarloTreeSearch();
+        	player_2 = new MonteCarloTreeSearch(this);
             while (!done) {
                 try {
                 	int aikey = stdin.nextInt();
@@ -615,6 +617,57 @@ public class Checkers extends JPanel {
         public void mouseEntered(MouseEvent evt) { }
         @Override
         public void mouseExited(MouseEvent evt) { }
+
+
+		@Override
+		public int getPlayer(CheckersData state) {
+			return currentPlayer;
+		}
+
+		@Override
+		public List<CheckersMove> getActions(CheckersData state) {
+			CheckersMove[] actions = state.getLegalMoves(currentPlayer);
+			return actions == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(actions));
+		}
+
+		@Override
+		public CheckersData getResult(CheckersData state, CheckersMove action) {
+			CheckersData simulatedBoard = copyBoard(state);
+			simulatedBoard.makeMove(action);
+			return simulatedBoard;
+		}
+
+		@Override
+		public boolean isTerminal(CheckersData state) {
+			CheckersMove[] moves = state.getLegalMoves(currentPlayer);
+			return (moves == null || moves.length == 0);
+		}
+
+		@Override
+		public double getUtility(CheckersData state, int player) {
+	    	int redPieceCount = 0;
+	    	int blackPieceCount = 0;
+	    	for(int row = 0; row < 8; ++row) {
+	    		for(int col = 0; col < 8; ++col) {
+	    			if (state.existsRedPlayerPiece(row, col)) {
+	    				redPieceCount++;
+	    			}
+	    			else if (state.existsBlackPlayerPiece(row, col)) {
+	    				blackPieceCount++;
+	    			}
+	    			// if(player == CheckersData.RED && state.existsRedPlayerPiece(row, col)) {
+//	    				redPieceCount++;
+//	    			}
+//	    			else if(player == CheckersData.BLACK && state.existsBlackPlayerPiece(row, col)) {
+//	    				blackPieceCount++;
+//	    			}
+	    		}
+	    	}
+	    	
+	    	int myPieceCount = (player == CheckersData.RED) ? redPieceCount : blackPieceCount;
+	    	int otherPieceCount = (player == CheckersData.BLACK) ? redPieceCount : blackPieceCount;
+	    	return Integer.compare(myPieceCount, otherPieceCount);
+	    }
     }  // end class Board
     public void timeDelay(int t) {
         try {
