@@ -6,14 +6,14 @@ import java.util.List;
 
 public interface Game {
 
-    int getPlayer(CheckersData state);
+    int getPlayer(GameState state);
 
-    List<CheckersMove> getActions(CheckersData state);
+    List<CheckersMove> getActions(GameState state);
 
-    CheckersData getResult(CheckersData state, CheckersMove action);
+    GameState getResult(GameState state, CheckersMove action);
 
-    boolean isTerminal(CheckersData state);
+    boolean isTerminal(GameState state);
 
-    double getUtility(CheckersData state, int player);
+    double getUtility(GameState state, int player);
 }
 

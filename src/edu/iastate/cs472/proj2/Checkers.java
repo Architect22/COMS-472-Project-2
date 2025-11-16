@@ -620,39 +620,42 @@ public class Checkers extends JPanel {
 
 
 		@Override
-		public int getPlayer(CheckersData state) {
-			return currentPlayer;
+		public int getPlayer(GameState state) {
+			return state.getCurrentPlayer();
 		}
 
 		@Override
-		public List<CheckersMove> getActions(CheckersData state) {
-			CheckersMove[] actions = state.getLegalMoves(currentPlayer);
+		public List<CheckersMove> getActions(GameState state) {
+			int player = state.getCurrentPlayer();
+			CheckersMove[] actions = state.getCheckersData().getLegalMoves(player);
 			return actions == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(actions));
 		}
 
 		@Override
-		public CheckersData getResult(CheckersData state, CheckersMove action) {
-			CheckersData simulatedBoard = copyBoard(state);
+		public GameState getResult(GameState state, CheckersMove action) {
+			CheckersData simulatedBoard = copyBoard(state.getCheckersData());
 			simulatedBoard.makeMove(action);
-			return simulatedBoard;
+			int nextPlayer = state.getCurrentPlayer() == CheckersData.RED ? CheckersData.BLACK : CheckersData.RED;
+			return new GameState(simulatedBoard, nextPlayer);
 		}
 
 		@Override
-		public boolean isTerminal(CheckersData state) {
-			CheckersMove[] moves = state.getLegalMoves(currentPlayer);
+		public boolean isTerminal(GameState state) {
+			int player = state.getCurrentPlayer();
+			CheckersMove[] moves = state.getCheckersData().getLegalMoves(player);
 			return (moves == null || moves.length == 0);
 		}
 
 		@Override
-		public double getUtility(CheckersData state, int player) {
+		public double getUtility(GameState state, int player) {
 	    	int redPieceCount = 0;
 	    	int blackPieceCount = 0;
 	    	for(int row = 0; row < 8; ++row) {
 	    		for(int col = 0; col < 8; ++col) {
-	    			if (state.existsRedPlayerPiece(row, col)) {
+	    			if (state.getCheckersData().existsRedPlayerPiece(row, col)) {
 	    				redPieceCount++;
 	    			}
-	    			else if (state.existsBlackPlayerPiece(row, col)) {
+	    			else if (state.getCheckersData().existsBlackPlayerPiece(row, col)) {
 	    				blackPieceCount++;
 	    			}
 	    			// if(player == CheckersData.RED && state.existsRedPlayerPiece(row, col)) {
