@@ -1,5 +1,7 @@
 package edu.iastate.cs472.proj2;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GameState {
 	private CheckersData checkersData;
@@ -32,8 +34,11 @@ public class GameState {
     
     @Override
     public String toString() {
-        return "Current Player: " + (currentPlayer == CheckersData.RED ? "RED" : "BLACK")
-        		+ "\n" +
-        		checkersData.toString() + "\n";
+    	Pattern pattern = Pattern.compile("\\u001B\\[[0-9;]*m");
+    	Matcher matcher = pattern.matcher(checkersData.toString());
+    	String checkersDataText = matcher.replaceAll("");        
+    	        
+        return "\nCurrent Player: " + (currentPlayer == CheckersData.RED ? "RED" : "BLACK")
+        		+ "\n" + checkersDataText + "\n";
    }
 }

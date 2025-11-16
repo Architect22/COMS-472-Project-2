@@ -633,7 +633,7 @@ public class Checkers extends JPanel {
 
 		@Override
 		public GameState getResult(GameState state, CheckersMove action) {
-			CheckersData simulatedBoard = copyBoard(state.getCheckersData());
+			CheckersData simulatedBoard = new CheckersData(state.getCheckersData());
 			simulatedBoard.makeMove(action);
 			int nextPlayer = state.getCurrentPlayer() == CheckersData.RED ? CheckersData.BLACK : CheckersData.RED;
 			return new GameState(simulatedBoard, nextPlayer);

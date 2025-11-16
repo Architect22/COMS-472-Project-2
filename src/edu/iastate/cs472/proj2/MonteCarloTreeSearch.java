@@ -28,7 +28,6 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
 	 */
 	public MonteCarloTreeSearch(Game game) {
 		this.game = game;
-		this.iterations = 1;  // TODO: How many iterations do we want?
 		tree = new MCTree<>();
 	}	
 	
@@ -58,7 +57,8 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
         System.out.println();
 
         // AI always is the Black player
-        return makeDecision(new GameState(board, CheckersData.BLACK));
+        CheckersData copyOfBoard = new CheckersData(board);
+        return makeDecision(new GameState(copyOfBoard, CheckersData.BLACK));
     }
     
     // TODO
@@ -73,6 +73,8 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
     // 
     
 	public CheckersMove makeDecision(GameState state) {
+		iterations = 10;  // TODO: How many iterations do we want?
+
 		// tree <-- NODE(state)
 		tree.addRoot(state);
 		// while TIME-REMAINING() do

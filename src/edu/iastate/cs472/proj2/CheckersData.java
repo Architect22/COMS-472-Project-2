@@ -36,6 +36,17 @@ public class CheckersData {
         board = new int[8][8];
         setUpGame();
     }
+    
+    CheckersData(CheckersData copy) {
+        board = new int[8][8];
+        for(int i=0; i<copy.board.length;i++)
+        {
+            for(int j=0;j<8;j++)
+            {
+                board[i][j]=copy.board[i][j];
+            }
+        }
+    }
 
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
