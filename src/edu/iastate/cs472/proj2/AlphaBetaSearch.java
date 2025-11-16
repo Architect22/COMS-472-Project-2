@@ -16,55 +16,55 @@ public class AlphaBetaSearch extends AdversarialSearch {
     /**
      * Creates a new search object for a given game.
      */
-    public static AlphaBetaSearch createFor(CheckersData game) {
-        return new AlphaBetaSearch(game);
-    }
-
-    public AlphaBetaSearch(CheckersData game) {
-        this.game = game;
-    }
-
-    public CheckersMove makeDecision(CheckersData state, int player) {
-        metrics = new Metrics();
-        CheckersMove result = null;
-        double resultValue = Double.NEGATIVE_INFINITY;
-        for (CheckersMove action : game.getActions(state)) {
-            double value = minValue(game.getResult(state, action), player, resultValue, Double.POSITIVE_INFINITY);
-            if (value > resultValue) {
-                result = action;
-                resultValue = value;
-            }
-        }
-        return result;
-    }
-
-    public double maxValue(CheckersData state, int player, double alpha, double beta) {
-        metrics.incrementInt(METRICS_NODES_EXPANDED);
-        if (game.isTerminal(state))
-            return game.getUtility(state, player);
-        double value = Double.NEGATIVE_INFINITY;
-        for (CheckersMove action : game.getActions(state)) {
-            value = Math.max(value, minValue(game.getResult(state, action), player, alpha, beta));
-            if (value >= beta)
-                return value;
-            alpha = Math.max(alpha, value);
-        }
-        return value;
-    }
-
-    public double minValue(CheckersData state, int player, double alpha, double beta) {
-        metrics.incrementInt(METRICS_NODES_EXPANDED);
-        if (game.isTerminal(state))
-            return game.getUtility(state, player);
-        double value = Double.POSITIVE_INFINITY;
-        for (CheckersMove action : game.getActions(state)) {
-            value = Math.min(value, maxValue(game.getResult(state, action), player, alpha, beta));
-            if (value <= alpha)
-                return value;
-            beta = Math.min(beta, value);
-        }
-        return value;
-    }
+//    public static AlphaBetaSearch createFor(CheckersData game) {
+//        return new AlphaBetaSearch(game);
+//    }
+//
+//    public AlphaBetaSearch(CheckersData game) {
+//        this.game = game;
+//    }
+//
+//    public CheckersMove makeDecision(CheckersData state, int player) {
+//        metrics = new Metrics();
+//        CheckersMove result = null;
+//        double resultValue = Double.NEGATIVE_INFINITY;
+//        for (CheckersMove action : game.getActions(state)) {
+//            double value = minValue(game.getResult(state, action), player, resultValue, Double.POSITIVE_INFINITY);
+//            if (value > resultValue) {
+//                result = action;
+//                resultValue = value;
+//            }
+//        }
+//        return result;
+//    }
+//
+//    public double maxValue(CheckersData state, int player, double alpha, double beta) {
+//        metrics.incrementInt(METRICS_NODES_EXPANDED);
+//        if (game.isTerminal(state))
+//            return game.getUtility(state, player);
+//        double value = Double.NEGATIVE_INFINITY;
+//        for (CheckersMove action : game.getActions(state)) {
+//            value = Math.max(value, minValue(game.getResult(state, action), player, alpha, beta));
+//            if (value >= beta)
+//                return value;
+//            alpha = Math.max(alpha, value);
+//        }
+//        return value;
+//    }
+//
+//    public double minValue(CheckersData state, int player, double alpha, double beta) {
+//        metrics.incrementInt(METRICS_NODES_EXPANDED);
+//        if (game.isTerminal(state))
+//            return game.getUtility(state, player);
+//        double value = Double.POSITIVE_INFINITY;
+//        for (CheckersMove action : game.getActions(state)) {
+//            value = Math.min(value, maxValue(game.getResult(state, action), player, alpha, beta));
+//            if (value <= alpha)
+//                return value;
+//            beta = Math.min(beta, value);
+//        }
+//        return value;
+//    }
 
 //    @Override
 //    public Metrics getMetrics() {
