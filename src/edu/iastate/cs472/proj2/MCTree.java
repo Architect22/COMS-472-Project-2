@@ -109,6 +109,7 @@ public class MCTree<S, A>
 			}
 		}
 		
+//		System.out.println("Max uct: "+ max_uct);
 		Random rand = new Random();
 		return best_children.get(rand.nextInt(best_children.size()));
 	}

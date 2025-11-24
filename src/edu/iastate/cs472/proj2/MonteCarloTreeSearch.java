@@ -73,7 +73,7 @@ public class MonteCarloTreeSearch extends AdversarialSearch {
     // 
     
 	public CheckersMove makeDecision(GameState state) {
-		iterations = 10;  // TODO: How many iterations do we want?
+		iterations = 100;  // TODO: How many iterations do we want?
 
 		// tree <-- NODE(state)
 		tree.addRoot(state);

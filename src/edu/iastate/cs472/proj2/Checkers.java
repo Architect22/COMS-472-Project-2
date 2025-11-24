@@ -239,6 +239,9 @@ public class Checkers extends JPanel {
         CheckersData displayBoard;
         CheckersData agentBoard;
         
+        // TODO:
+        // GameImpl myGame = new GameImpl() <- the implementation of the game interface
+        
         Board() {
             setBackground(Color.BLACK);
             addMouseListener(this);
@@ -263,7 +266,9 @@ public class Checkers extends JPanel {
         {
         	Scanner stdin = new Scanner(System.in);
     		boolean done = false;
-    		player_1 = new AlphaBetaSearch();
+    		// TODO: When u add a class to implement game interfact, Pass in that class over this keyword
+    		// TODO: Pass in myGame
+    		player_1 = new AlphaBetaSearch(this);
         	player_2 = new MonteCarloTreeSearch(this);
             while (!done) {
                 try {
@@ -335,7 +340,7 @@ public class Checkers extends JPanel {
             if (!gameInProgress) {  // Should be impossible.
                 message.setText("There is no game in progress!");
                 return;
-            }
+         }
             if (currentPlayer == CheckersData.RED)
                 gameOver("RED resigns.  BLACK wins.");
             else
@@ -658,12 +663,6 @@ public class Checkers extends JPanel {
 	    			else if (state.getCheckersData().existsBlackPlayerPiece(row, col)) {
 	    				blackPieceCount++;
 	    			}
-	    			// if(player == CheckersData.RED && state.existsRedPlayerPiece(row, col)) {
-//	    				redPieceCount++;
-//	    			}
-//	    			else if(player == CheckersData.BLACK && state.existsBlackPlayerPiece(row, col)) {
-//	    				blackPieceCount++;
-//	    			}
 	    		}
 	    	}
 	    	

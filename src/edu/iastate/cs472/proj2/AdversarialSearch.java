@@ -32,6 +32,10 @@ public abstract class AdversarialSearch {
     protected int calculateHeuristic(CheckersData state, int player) {
     	return 0;
     }
+    protected Metrics getMetrics() {
+    	return null;
+    }
+  
 	
     /**
      * Return a move returned from either the alpha-beta search or the Monte Carlo tree search.
