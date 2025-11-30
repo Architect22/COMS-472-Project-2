@@ -2,7 +2,11 @@ package edu.iastate.cs472.proj2;
 
 
 import java.util.List;
-
+/**
+ * 
+ * @author Benjamin Brown
+ *
+ */
 
 public interface Game {
 
@@ -14,6 +18,6 @@ public interface Game {
 
     boolean isTerminal(GameState state);
 
-    double getUtility(GameState state, int player);
+	double getUtility(GameState state, int player);
 }
 

@@ -2,7 +2,11 @@ package edu.iastate.cs472.proj2;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+/**
+ * 
+ * @author Benjamin Brown
+ *
+ */
 public class GameState {
 	private CheckersData checkersData;
 	private int currentPlayer;

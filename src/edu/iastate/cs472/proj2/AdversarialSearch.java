@@ -9,7 +9,7 @@ package edu.iastate.cs472.proj2;
 /**
  * This class is to be extended by the classes AlphaBetaSearch and MonteCarloTreeSearch.
  */
-public abstract class AdversarialSearch {
+public abstract class AdversarialSearch{
     protected CheckersData board;
 
     // An instance of this class will be created in the Checkers.Board
@@ -35,7 +35,6 @@ public abstract class AdversarialSearch {
     protected Metrics getMetrics() {
     	return null;
     }
-  
 	
     /**
      * Return a move returned from either the alpha-beta search or the Monte Carlo tree search.

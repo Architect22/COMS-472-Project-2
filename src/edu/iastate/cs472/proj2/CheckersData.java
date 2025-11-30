@@ -11,6 +11,8 @@ import java.util.Stack;
  * Note that RED moves "up" the board (i.e. row number decreases)
  * while BLACK moves "down" the board (i.e. row number increases).
  * Methods are provided to return lists of available legal moves.
+ * 
+ * @author Benjamin Brown
  */
 public class CheckersData {
 
@@ -235,7 +237,7 @@ public class CheckersData {
     	
     	// If there are any jump moves, remove the single space moves since jumps are required
     	if (moves.stream().anyMatch(x -> x.isJump())) {
-    	   	moves = moves.stream().filter(x -> x.isJump()).toList();    		
+    	   	moves = moves.stream().filter(x -> x.isJump()).toList();
     	}
     	
     	if (moves.size() == 0) {

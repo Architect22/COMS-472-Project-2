@@ -8,8 +8,10 @@ import java.util.TreeMap;
 /**
  * Stores key-value pairs for efficiency analysis.
  * 
+ * Mostly contributed from
  * @author Ravi Mohan
  * @author Ruediger Lunde
+ * @author Benjamin Brown
  */
 public class Metrics {
 	private Hashtable<String, String> hash;

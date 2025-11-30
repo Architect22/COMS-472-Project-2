@@ -15,6 +15,10 @@ import java.util.ArrayList;
  * a single move: (2, 0) -> (3, 1)
  * a sequence of jumps: (2, 0) -> (4, 2) -> (6, 0)
  *
+ * 
+ * @author Benjamin Brown
+ *
+ *
  */
 public class CheckersMove {
     

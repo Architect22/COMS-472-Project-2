@@ -33,16 +33,16 @@ package edu.iastate.cs472.proj2;
 /**
  * Node type for the Monte Carlo search tree.
  */
-public class MCNode<S, A>
+public class MCNode<S>
 {
 	// n.STATE: the state in the state space to which the node corresponds;
 	private final S gameState;
 
 	// n.PARENT: the node in the search tree that generated this node;
-	private final MCNode<S, A> parent;
+	private final MCNode<S> parent;
 
 	// n.ACTION: the action that was applied to the parent to generate the node;
-	private final A action;
+//	private final A action;
 
 	// n.PATH-COST: the cost, traditionally denoted by g(n), of the path from
 	// the initial state to the node, as indicated by the parent pointers.
@@ -50,13 +50,12 @@ public class MCNode<S, A>
 
 	
 	public MCNode(S state) {
-		this(state, null, null, 0.0);
+		this(state, null, 0.0);
 	}
 	
-	public MCNode(S gameState, MCNode<S, A> parent, A action, double pathCost) {
+	public MCNode(S gameState, MCNode<S> parent, double pathCost) {
 		this.gameState = gameState;
 		this.parent = parent;
-		this.action = action;
 		this.pathCost = pathCost;
 	}
 
@@ -66,13 +65,8 @@ public class MCNode<S, A>
 	}
 
 
-	public MCNode<S, A> getParent() {
+	public MCNode<S> getParent() {
 		return parent;
-	}
-
-
-	public A getAction() {
-		return action;
 	}
 
 
@@ -83,7 +77,7 @@ public class MCNode<S, A>
 
 	@Override
 	public String toString() {
-		return "[parent=" + parent + ", action=" + action + ", state=" + getGameState() + ", pathCost=" + pathCost + "]";
+		return "[parent=" + parent + ", state=" + getGameState() + ", pathCost=" + pathCost + "]";
 	}
 }
 

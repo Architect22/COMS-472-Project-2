@@ -1,5 +1,7 @@
 package edu.iastate.cs472.proj2;
 
+import java.util.ArrayList;
+
 /**
  * 
  * @author Benjamin Brown
@@ -11,16 +13,16 @@ package edu.iastate.cs472.proj2;
  * This class implements the Alpha-Beta pruning algorithm to find the best 
  * move at current state.
 */
-public class AlphaBetaSearch extends AdversarialSearch {
+public class AlphaBetaSearch extends AdversarialSearch{
 	private Game game;
-	 private Metrics metrics = new Metrics();
-	 public final static String METRICS_NODES_EXPANDED = "nodesExpanded";
-    /**
-     * Creates a new search object for a given game.
-     */
-    public static AlphaBetaSearch createFor(Game game) {
-        return new AlphaBetaSearch(game);
-    }
+	private Metrics metrics = new Metrics();
+	public final static String METRICS_NODES_EXPANDED = "nodesExpanded";
+	
+	private ArrayList<CheckersMove> blackPreviousMove = new ArrayList<>();
+	private ArrayList<CheckersMove> redPreviousMove = new ArrayList<>();;
+	private int blackMoveRepeatCount = 0;
+	private int redMoveRepeatCount = 0;
+	private boolean draw = false;
 
     public AlphaBetaSearch(Game game) {
         this.game = game;
@@ -51,13 +53,14 @@ public class AlphaBetaSearch extends AdversarialSearch {
         System.out.println();
         
         CheckersData boardCopy = new CheckersData(board);
-        return makeDecision(new GameState(boardCopy, CheckersData.BLACK),CheckersData.BLACK);
+        return makeDecision(new GameState(boardCopy, CheckersData.BLACK));
     }
 
-    public CheckersMove makeDecision(GameState state, int player) {
+    public CheckersMove makeDecision(GameState state) {
         metrics = new Metrics();
         CheckersMove result = null;
         double resultValue = Double.NEGATIVE_INFINITY;
+        int player = state.getCurrentPlayer();
         for (CheckersMove action : game.getActions(state)) {
             double value = minValue(game.getResult(state, action), player, resultValue, Double.POSITIVE_INFINITY);
             if (value > resultValue) {
@@ -70,11 +73,13 @@ public class AlphaBetaSearch extends AdversarialSearch {
 
     public double maxValue(GameState state, int player, double alpha, double beta) {
         metrics.incrementInt(METRICS_NODES_EXPANDED);
-        if (game.isTerminal(state))
+        if (game.isTerminal(state) || draw)
             return game.getUtility(state, player);
         double value = Double.NEGATIVE_INFINITY;
         for (CheckersMove action : game.getActions(state)) {
-            value = Math.max(value, minValue(game.getResult(state, action), player, alpha, beta));
+        	GameState result = game.getResult(state, action);
+        	calculateDraw(action, player);
+            value = Math.max(value, minValue(result, result.getCurrentPlayer(), alpha, beta));
             if (value >= beta)
                 return value;
             alpha = Math.max(alpha, value);
@@ -84,11 +89,13 @@ public class AlphaBetaSearch extends AdversarialSearch {
 
     public double minValue(GameState state, int player, double alpha, double beta) {
         metrics.incrementInt(METRICS_NODES_EXPANDED);
-        if (game.isTerminal(state))
+        if (game.isTerminal(state) || draw)
             return game.getUtility(state, player);
         double value = Double.POSITIVE_INFINITY;
         for (CheckersMove action : game.getActions(state)) {
-            value = Math.min(value, maxValue(game.getResult(state, action), player, alpha, beta));
+        	GameState result = game.getResult(state, action);
+        	calculateDraw(action, player);
+            value = Math.min(value, maxValue(result, result.getCurrentPlayer(), alpha, beta));
             if (value <= alpha)
                 return value;
             beta = Math.min(beta, value);
@@ -100,35 +107,33 @@ public class AlphaBetaSearch extends AdversarialSearch {
     public Metrics getMetrics() {
         return metrics;
     }
-
-    @Override
-    protected int calculateHeuristic(CheckersData state, int player) {
-    	int pieceCount = 0;
-    	for(int row = 0; row < 8; ++row) {
-    		for(int col = 0; col < 8; ++col) {
-    			if(player == CheckersData.RED && state.existsRedPlayerPiece(row, col)) {
-    				pieceCount++;
-    			}
-    			else if(player == CheckersData.BLACK && state.existsBlackPlayerPiece(row, col)) {
-    				pieceCount++;
-    			}
-    		}
-    	}
-    	return pieceCount;
+    
+    private boolean calculateDraw(CheckersMove result, int player) {
+        // if you haven't seen this move yet, add it to a list
+        if(player == CheckersData.BLACK && !blackPreviousMove.contains(result)) {
+        	blackPreviousMove.add(result);
+        	if(blackPreviousMove.size() > 3) {
+        		// if you list is bigger than 2 moves, remove a move
+        		blackPreviousMove.remove(0);
+        	}
+        }
+        else if(player == CheckersData.BLACK && blackPreviousMove.contains(result)) {
+        	// if you are cycling the same moves, increase the repeat count variable
+        	blackMoveRepeatCount++;
+        }
+        if(player == CheckersData.RED && !redPreviousMove.contains(result)) {
+        	redPreviousMove.add(result);
+        	if(redPreviousMove.size() > 3) {
+        		redPreviousMove.remove(0);
+        	}
+        }
+        else if(player == CheckersData.RED && redPreviousMove.contains(result)) {
+        	redMoveRepeatCount++;
+        }
+        
+        if(redMoveRepeatCount >= 3 || blackMoveRepeatCount >= 3) {
+        	draw = true;
+        }
+        return draw;
     }
-    
-//    In addition, the class AlphaBetaSearch needs to implement an evaluation function that takes a
-//    state of the game as input and returns a value. The utility function for terminal states has the
-//    following values:
-//    • 1 if a win by the agent,
-//    • −1 if a loss by the agent,
-//    • 0 if a draw.
-//    The score on a leaf that is not a terminal node is generated according to a heuristic of yours. 
-    private int evaluate(CheckersData state) {
-    	
-    	return 0;
-    }
-    
-    
-
 }
